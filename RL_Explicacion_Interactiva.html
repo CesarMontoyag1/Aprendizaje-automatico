@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aprendizaje Reforzado — Guía Interactiva</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e14;
+  --bg2: #15151f;
+  --bg3: #1c1c2a;
+  --border: rgba(255,255,255,0.07);
+  --text: #e8e6f0;
+  --text2: #9691b0;
+  --text3: #5e5a72;
+  --accent: #7c6fff;
+  --accent2: #a89fff;
+  --green: #3ddba0;
+  --red: #ff5f5f;
+  --orange: #ffb347;
+  --blue: #5bc8ff;
+  --yellow: #f7e05a;
+  --font-h: 'Syne', sans-serif;
+  --font-b: 'Lora', serif;
+  --font-m: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-b);
+  font-size: 16px;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+/* ─── NAV ─── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(14,14,20,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 4px;
+  padding: 0 2rem; height: 52px;
+}
+nav a {
+  font-family: var(--font-h); font-size: 11px; font-weight: 600;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--text3); text-decoration: none;
+  padding: 6px 12px; border-radius: 6px;
+  transition: color .2s, background .2s;
+}
+nav a:hover { color: var(--text); background: var(--bg3); }
+nav a.active { color: var(--accent2); background: rgba(124,111,255,.12); }
+.nav-brand {
+  font-family: var(--font-h); font-size: 13px; font-weight: 700;
+  color: var(--accent2); margin-right: auto; letter-spacing: -.01em;
+}
+
+/* ─── HERO ─── */
+.hero {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 6rem 2rem 4rem;
+  position: relative; overflow: hidden;
+}
+.hero-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+}
+.hero-glow {
+  position: absolute; width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(124,111,255,.15) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  pointer-events: none;
+}
+.hero-tag {
+  font-family: var(--font-m); font-size: 11px; color: var(--accent);
+  border: 1px solid rgba(124,111,255,.3); padding: 4px 14px;
+  border-radius: 20px; margin-bottom: 1.5rem; letter-spacing: .08em;
+  display: inline-block;
+  animation: fadeUp .6s ease both;
+}
+.hero h1 {
+  font-family: var(--font-h); font-size: clamp(2.4rem, 6vw, 4.5rem);
+  font-weight: 800; line-height: 1.1; letter-spacing: -.02em;
+  margin-bottom: 1.2rem;
+  animation: fadeUp .7s .1s ease both;
+}
+.hero h1 span { color: var(--accent2); }
+.hero p {
+  font-size: 1.1rem; color: var(--text2); max-width: 560px;
+  margin: 0 auto 2.5rem;
+  animation: fadeUp .7s .2s ease both;
+}
+.hero-btns {
+  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+  animation: fadeUp .7s .3s ease both;
+}
+.btn {
+  font-family: var(--font-h); font-size: 12px; font-weight: 600;
+  letter-spacing: .05em; text-transform: uppercase;
+  padding: 10px 22px; border-radius: 8px; cursor: pointer;
+  border: none; text-decoration: none; transition: all .2s;
+}
+.btn-primary {
+  background: var(--accent); color: #fff;
+}
+.btn-primary:hover { background: #6a5ef5; transform: translateY(-1px); }
+.btn-ghost {
+  background: transparent; color: var(--text2);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent2); }
+
+/* ─── SECTIONS ─── */
+.section {
+  max-width: 900px; margin: 0 auto;
+  padding: 5rem 2rem;
+}
+.section-tag {
+  font-family: var(--font-m); font-size: 11px; color: var(--accent);
+  letter-spacing: .1em; text-transform: uppercase; margin-bottom: .8rem;
+}
+.section h2 {
+  font-family: var(--font-h); font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700; letter-spacing: -.02em; line-height: 1.15;
+  margin-bottom: 1.2rem;
+}
+.section > p { color: var(--text2); margin-bottom: 2rem; max-width: 680px; }
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.4rem 1.6rem;
+  margin-bottom: 1rem;
+}
+.card h3 {
+  font-family: var(--font-h); font-size: 1rem; font-weight: 600;
+  margin-bottom: .5rem; letter-spacing: -.01em;
+}
+
+/* ─── CONCEPTS GRID ─── */
+.concepts-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px; margin-top: 1.5rem;
+}
+.concept-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.3rem;
+  transition: border-color .2s, transform .2s;
+  cursor: default;
+}
+.concept-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.concept-icon { font-size: 2rem; margin-bottom: .7rem; }
+.concept-card h3 {
+  font-family: var(--font-h); font-size: .95rem; font-weight: 700;
+  margin-bottom: .3rem; letter-spacing: -.01em;
+}
+.concept-sub { font-size: .8rem; color: var(--accent); font-family: var(--font-m); margin-bottom: .5rem; }
+.concept-card p { font-size: .88rem; color: var(--text2); line-height: 1.6; }
+
+/* ─── LAKE ─── */
+.lake-wrap { display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start; margin-top: 1.5rem; }
+.lake-grid {
+  display: grid; grid-template-columns: repeat(4, 72px);
+  grid-template-rows: repeat(4, 72px); gap: 8px;
+  flex-shrink: 0;
+}
+.lake-cell {
+  width: 72px; height: 72px; border-radius: 10px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .2s; position: relative;
+  border: 1.5px solid transparent;
+  font-family: var(--font-h); font-size: 1.3rem; font-weight: 700;
+  user-select: none;
+}
+.lake-cell .cell-id {
+  position: absolute; bottom: 4px; right: 6px;
+  font-family: var(--font-m); font-size: 9px; color: rgba(255,255,255,.3);
+}
+.lake-cell.S  { background: rgba(91,200,255,.12); border-color: rgba(91,200,255,.3); color: var(--blue); }
+.lake-cell.F  { background: var(--bg3); border-color: var(--border); color: var(--text2); }
+.lake-cell.H  { background: rgba(255,95,95,.1); border-color: rgba(255,95,95,.25); color: var(--red); }
+.lake-cell.G  { background: rgba(61,219,160,.12); border-color: rgba(61,219,160,.3); color: var(--green); }
+.lake-cell:hover { transform: scale(1.05); border-color: var(--accent); }
+.lake-cell.agent { box-shadow: 0 0 0 2px var(--accent), 0 0 20px rgba(124,111,255,.4); }
+.lake-info {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.3rem; flex: 1; min-width: 220px;
+}
+.lake-info h4 { font-family: var(--font-h); font-size: .9rem; font-weight: 600; margin-bottom: .8rem; }
+.info-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: .7rem; }
+.info-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; margin-top: 5px; }
+.info-row p { font-size: .84rem; color: var(--text2); line-height: 1.5; }
+.info-row strong { color: var(--text); font-weight: 500; }
+
+/* ─── Q-TABLE ─── */
+.qtable-wrap { overflow-x: auto; margin-top: 1.5rem; }
+table.qtable {
+  border-collapse: collapse; width: 100%;
+  font-family: var(--font-m); font-size: 12px;
+}
+.qtable th {
+  background: var(--bg3); color: var(--text2);
+  padding: 10px 14px; text-align: center;
+  border: 1px solid var(--border); font-weight: 500;
+}
+.qtable td {
+  padding: 8px 12px; text-align: center;
+  border: 1px solid var(--border);
+  transition: background .3s, color .3s;
+  cursor: pointer;
+}
+.qtable td:hover { background: rgba(124,111,255,.15) !important; }
+.qtable tr:first-child td { background: rgba(91,200,255,.05); color: var(--blue); }
+.q-explain {
+  margin-top: 1rem; background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1rem 1.2rem; font-size: .9rem; color: var(--text2);
+  min-height: 56px; transition: all .3s;
+}
+
+/* ─── BELLMAN ─── */
+.formula-display {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 2rem; text-align: center;
+  margin: 1.5rem 0; position: relative; overflow: hidden;
+}
+.formula-display::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(124,111,255,.06), transparent);
+  pointer-events: none;
+}
+.formula-text {
+  font-family: var(--font-m); font-size: clamp(11px, 2vw, 15px);
+  line-height: 2.4; letter-spacing: -.01em;
+}
+.fq  { color: var(--accent2); background: rgba(124,111,255,.15); padding: 2px 8px; border-radius: 5px; }
+.fa  { color: var(--green);   background: rgba(61,219,160,.12);  padding: 2px 8px; border-radius: 5px; }
+.fr  { color: var(--orange);  background: rgba(255,179,71,.12);  padding: 2px 8px; border-radius: 5px; }
+.fg  { color: var(--red);     background: rgba(255,95,95,.12);   padding: 2px 8px; border-radius: 5px; }
+.ff  { color: var(--blue);    background: rgba(91,200,255,.12);  padding: 2px 8px; border-radius: 5px; }
+.fe  { color: var(--yellow);  background: rgba(247,224,90,.1);   padding: 2px 8px; border-radius: 5px; }
+
+.terms-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px; margin-bottom: 2rem;
+}
+.term-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px;
+}
+.term-sym { font-family: var(--font-m); font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.term-card p { font-size: .83rem; color: var(--text2); line-height: 1.55; }
+
+/* ─── SIMULATOR ─── */
+.sim-box {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.6rem; margin-top: 1.5rem;
+}
+.sim-title { font-family: var(--font-h); font-size: 1rem; font-weight: 600; margin-bottom: 1.2rem; }
+.slider-row {
+  display: grid; grid-template-columns: 160px 1fr 56px;
+  gap: 12px; align-items: center; margin-bottom: 12px;
+}
+.slider-row label { font-size: .82rem; color: var(--text2); font-family: var(--font-m); }
+input[type=range] {
+  -webkit-appearance: none; width: 100%; height: 4px;
+  background: var(--bg3); border-radius: 4px; outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px;
+  background: var(--accent); border-radius: 50%; cursor: pointer;
+  transition: transform .15s;
+}
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.slider-val { font-family: var(--font-m); font-size: 13px; text-align: right; color: var(--text); }
+.sim-result {
+  background: var(--bg3); border-radius: 10px; padding: 1.2rem 1.4rem;
+  margin-top: 1.2rem; line-height: 2;
+}
+.sim-result .mono { font-family: var(--font-m); font-size: 13px; }
+.sim-big { font-family: var(--font-m); font-size: 2rem; font-weight: 500; color: var(--accent2); margin-top: .4rem; display: block; }
+.sim-dir { font-size: .9rem; color: var(--text2); }
+
+/* ─── PROPAGATION ─── */
+.prop-chain {
+  display: flex; align-items: center; gap: 10px;
+  margin: 1.5rem 0; flex-wrap: wrap; justify-content: center;
+}
+.prop-cell {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.prop-box {
+  width: 70px; height: 70px; border-radius: 10px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 1.5px solid var(--border); transition: all .4s;
+}
+.prop-box .p-name { font-family: var(--font-h); font-size: 1.1rem; font-weight: 700; }
+.prop-box .p-q {
+  font-family: var(--font-m); font-size: 11px; color: var(--text2); margin-top: 2px;
+  transition: all .4s;
+}
+.prop-label { font-size: 10px; font-family: var(--font-m); color: var(--text3); text-align: center; max-width: 70px; }
+.prop-arrow { font-size: 1.2rem; color: var(--text3); padding-bottom: 20px; }
+.prop-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1.2rem; }
+.prop-btn {
+  font-family: var(--font-h); font-size: 11px; font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; padding: 8px 18px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--bg3); color: var(--text2);
+  cursor: pointer; transition: all .2s;
+}
+.prop-btn:hover { border-color: var(--accent); color: var(--accent2); }
+.prop-btn.active { background: rgba(124,111,255,.15); border-color: var(--accent); color: var(--accent2); }
+.prop-log {
+  background: var(--bg3); border-radius: 10px; padding: 1rem 1.2rem;
+  font-family: var(--font-m); font-size: 12px; line-height: 2;
+  min-height: 80px; color: var(--text2);
+}
+
+/* ─── HOLES ─── */
+.hole-demo {
+  display: flex; gap: 2rem; flex-wrap: wrap;
+  align-items: flex-start; margin-top: 1.5rem;
+}
+.hole-chain {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.hole-step {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 14px;
+  transition: border-color .3s, background .3s;
+}
+.hole-step.hl { border-color: var(--accent); background: rgba(124,111,255,.06); }
+.hole-step-box {
+  width: 44px; height: 44px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-h); font-size: 1rem; font-weight: 700;
+}
+.hole-step-info h4 { font-family: var(--font-h); font-size: .88rem; font-weight: 600; margin-bottom: 2px; }
+.hole-step-info p { font-size: .82rem; color: var(--text2); }
+.hole-btn { margin-top: 1rem; }
+.hole-calc {
+  flex: 1; min-width: 260px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 14px;
+  padding: 1.3rem;
+}
+.hole-calc h4 { font-family: var(--font-h); font-size: .9rem; font-weight: 600; margin-bottom: 1rem; }
+.calc-line {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 0; border-bottom: 1px solid var(--border);
+  font-size: .84rem; color: var(--text2);
+}
+.calc-line:last-child { border-bottom: none; }
+.calc-line span { font-family: var(--font-m); font-size: 13px; color: var(--text); }
+.calc-line.total { padding-top: 10px; }
+.calc-line.total .calc-key { color: var(--text); font-weight: 500; }
+.calc-line.total span { color: var(--red); font-size: 14px; }
+.calc-line.result span { color: var(--green); font-size: 15px; font-weight: 500; }
+
+/* ─── DIVIDER ─── */
+.section-divider {
+  height: 1px; background: var(--border);
+  max-width: 900px; margin: 0 auto;
+}
+
+/* ─── FOOTER ─── */
+footer {
+  text-align: center; padding: 3rem 2rem;
+  font-size: .82rem; color: var(--text3);
+  font-family: var(--font-m);
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.reveal {
+  opacity: 0; transform: translateY(20px);
+  transition: opacity .6s ease, transform .6s ease;
+}
+.reveal.visible { opacity: 1; transform: none; }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand">RL Guide</span>
+  <a href="#conceptos" class="nav-link">Conceptos</a>
+  <a href="#entorno" class="nav-link">Entorno</a>
+  <a href="#qtable" class="nav-link">Q-Table</a>
+  <a href="#bellman" class="nav-link">Bellman</a>
+  <a href="#gamma" class="nav-link">Gamma</a>
+  <a href="#hoyos" class="nav-link">Hoyos</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <span class="hero-tag">Universidad EAFIT · 2026</span>
+  <h1>Aprendizaje<br><span>Reforzado</span></h1>
+  <p>Una guía interactiva y visual para entender Q-Learning, la ecuación de Bellman, gamma y cómo un agente aprende por ensayo y error.</p>
+  <div class="hero-btns">
+    <a href="#conceptos" class="btn btn-primary">Comenzar</a>
+    <a href="#bellman" class="btn btn-ghost">Ir a Bellman</a>
+  </div>
+</section>
+
+<!-- 1. CONCEPTOS -->
+<div class="section-divider"></div>
+<section class="section reveal" id="conceptos">
+  <div class="section-tag">01 — Fundamentos</div>
+  <h2>Los 5 conceptos clave</h2>
+  <p>El Aprendizaje Reforzado se construye sobre 5 piezas. Sin entenderlas, la ecuación de Bellman no tiene sentido. Con ellas, todo encaja.</p>
+  <div class="concepts-grid">
+    <div class="concept-card">
+      <div class="concept-icon">🧠</div>
+      <h3>Agente</h3>
+      <div class="concept-sub">Agent</div>
+      <p>Quien toma las decisiones. En FrozenLake es el personaje que camina por el lago. Es el "cerebro" que queremos entrenar.</p>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🌎</div>
+      <h3>Entorno</h3>
+      <div class="concept-sub">Environment</div>
+      <p>El mundo con el que interactúa el agente. Recibe sus acciones y le responde con el nuevo estado y la recompensa.</p>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">📍</div>
+      <h3>Estado</h3>
+      <div class="concept-sub">State (s)</div>
+      <p>La situación actual observable. En FrozenLake es el número de la celda donde está el agente, del 0 al 15.</p>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">⬆️</div>
+      <h3>Acción</h3>
+      <div class="concept-sub">Action (a)</div>
+      <p>Lo que el agente puede hacer en cada estado. En FrozenLake: izquierda, abajo, derecha o arriba.</p>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🏆</div>
+      <h3>Recompensa</h3>
+      <div class="concept-sub">Reward (r)</div>
+      <p>La señal numérica que guía el aprendizaje. +1 al llegar a la meta, 0 en cualquier otro caso. Es la única guía del agente.</p>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🔄</div>
+      <h3>Ciclo</h3>
+      <div class="concept-sub">Loop</div>
+      <p>Estado → Acción → Recompensa → Nuevo estado. Este ciclo se repite miles de veces hasta que el agente aprende.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2. ENTORNO -->
+<div class="section-divider"></div>
+<section class="section reveal" id="entorno">
+  <div class="section-tag">02 — FrozenLake</div>
+  <h2>El entorno que usamos</h2>
+  <p>FrozenLake es un tablero 4×4. El agente empieza en S y debe llegar a G sin caer en ningún H. Haz clic en cualquier celda para saber qué es.</p>
+  <div class="lake-wrap">
+    <div class="lake-grid" id="lakeGrid"></div>
+    <div class="lake-info">
+      <h4>Información de la celda</h4>
+      <div id="lakeInfoContent">
+        <div class="info-row"><div class="info-dot" style="background:var(--blue)"></div><p><strong>S — Inicio (Start)</strong><br>El agente siempre comienza aquí. Es el estado 0.</p></div>
+        <div class="info-row"><div class="info-dot" style="background:var(--text3)"></div><p><strong>F — Hielo (Frozen)</strong><br>Celda segura. El agente puede caminar sobre ella sin consecuencias.</p></div>
+        <div class="info-row"><div class="info-dot" style="background:var(--red)"></div><p><strong>H — Hoyo (Hole)</strong><br>Si el agente cae aquí, el episodio termina. Recompensa 0.</p></div>
+        <div class="info-row"><div class="info-dot" style="background:var(--green)"></div><p><strong>G — Meta (Goal)</strong><br>El objetivo. Al llegar aquí el agente recibe recompensa +1 y el episodio termina.</p></div>
+      </div>
+      <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+        <p style="font-size:.82rem;color:var(--text3);font-family:var(--font-m)">haz clic en una celda para ver su detalle</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Q-TABLE -->
+<div class="section-divider"></div>
+<section class="section reveal" id="qtable">
+  <div class="section-tag">03 — Q-Table</div>
+  <h2>La tabla de conocimiento</h2>
+  <p>La Q-Table es la "memoria" del agente. Tiene una fila por cada estado (16) y una columna por cada acción (4). Al inicio todo vale 0. Haz clic en cualquier celda para entender qué significa ese valor.</p>
+  <div class="qtable-wrap">
+    <table class="qtable" id="qtableEl">
+      <thead>
+        <tr>
+          <th>Estado</th>
+          <th>← Izq</th><th>↓ Abajo</th><th>→ Der</th><th>↑ Arriba</th>
+        </tr>
+      </thead>
+      <tbody id="qtableBody"></tbody>
+    </table>
+  </div>
+  <div class="q-explain" id="qExplain">
+    💡 Haz clic en cualquier celda de la tabla para ver qué significa ese valor Q.
+  </div>
+</section>
+
+<!-- 4. BELLMAN -->
+<div class="section-divider"></div>
+<section class="section reveal" id="bellman">
+  <div class="section-tag">04 — Ecuación de Bellman</div>
+  <h2>Cómo el agente actualiza lo que sabe</h2>
+  <p>Esta ecuación es el corazón de Q-Learning. Le dice al agente cómo corregir su estimación después de cada acción.</p>
+
+  <div class="formula-display">
+    <div class="formula-text">
+      <span class="fq">Q(s, a)</span> ← <span class="fq">Q(s, a)</span> + <span class="fa">α</span> × [ <span class="fr">r</span> + <span class="fg">γ</span> × <span class="ff">max Q(s', a')</span> − <span class="fq">Q(s, a)</span> ]
+    </div>
+  </div>
+
+  <div class="terms-grid">
+    <div class="term-card">
+      <div class="term-sym fq">Q(s, a)</div>
+      <p>Lo que el agente <em>creía</em> que valía esa acción en ese estado, antes de actuar. Está guardado en la Q-Table.</p>
+    </div>
+    <div class="term-card">
+      <div class="term-sym fa">α — alpha</div>
+      <p>Tasa de aprendizaje. Controla qué tanto le hacemos caso a la info nueva. 0 = nunca aprende. 1 = olvida todo lo anterior.</p>
+    </div>
+    <div class="term-card">
+      <div class="term-sym fr">r — reward</div>
+      <p>La recompensa inmediata que recibió el agente por esa acción. En FrozenLake: 1 si llegó a G, 0 en cualquier otro caso.</p>
+    </div>
+    <div class="term-card">
+      <div class="term-sym fg">γ — gamma</div>
+      <p>Factor de descuento. Cuánto vale el futuro hoy. Con γ=0.95 el futuro todavía vale casi lo mismo que el presente.</p>
+    </div>
+    <div class="term-card">
+      <div class="term-sym ff">max Q(s', a')</div>
+      <p>El mejor valor Q del estado al que llegó el agente. Se lee directamente de la Q-Table — no se calcula desde cero.</p>
+    </div>
+    <div class="term-card">
+      <div class="term-sym fe">[ … − Q(s,a) ]</div>
+      <p>El error: qué tan equivocado estaba el agente. Si es positivo, la acción fue mejor de lo esperado. Si es negativo, fue peor.</p>
+    </div>
+  </div>
+
+  <div class="sim-box">
+    <div class="sim-title">Simulador de la ecuación — mueve los valores y observa</div>
+    <div class="slider-row">
+      <label>Q(s,a) actual</label>
+      <input type="range" id="s_q" min="0" max="1" step="0.01" value="0.3" oninput="simCalc()">
+      <span class="slider-val" id="v_q">0.30</span>
+    </div>
+    <div class="slider-row">
+      <label>α — tasa aprendizaje</label>
+      <input type="range" id="s_a" min="0" max="1" step="0.01" value="0.8" oninput="simCalc()">
+      <span class="slider-val" id="v_a">0.80</span>
+    </div>
+    <div class="slider-row">
+      <label>r — recompensa</label>
+      <input type="range" id="s_r" min="0" max="1" step="0.01" value="1" oninput="simCalc()">
+      <span class="slider-val" id="v_r">1.00</span>
+    </div>
+    <div class="slider-row">
+      <label>γ — gamma</label>
+      <input type="range" id="s_g" min="0" max="1" step="0.01" value="0.95" oninput="simCalc()">
+      <span class="slider-val" id="v_g">0.95</span>
+    </div>
+    <div class="slider-row">
+      <label>max Q(s', a')</label>
+      <input type="range" id="s_f" min="0" max="1" step="0.01" value="0.9" oninput="simCalc()">
+      <span class="slider-val" id="v_f">0.90</span>
+    </div>
+    <div class="sim-result" id="simResult"></div>
+  </div>
+</section>
+
+<!-- 5. GAMMA -->
+<div class="section-divider"></div>
+<section class="section reveal" id="gamma">
+  <div class="section-tag">05 — Gamma en acción</div>
+  <h2>Cómo el valor se propaga hacia atrás</h2>
+  <p>Gamma resuelve un problema: la recompensa +1 solo llega cuando el agente toca la meta. ¿Cómo aprende que los estados anteriores también son valiosos? Presiona los episodios en orden.</p>
+
+  <div class="prop-btns">
+    <button class="prop-btn active" id="pbtn0" onclick="showEp(0)">Estado inicial</button>
+    <button class="prop-btn" id="pbtn1" onclick="showEp(1)">Episodio 1</button>
+    <button class="prop-btn" id="pbtn2" onclick="showEp(2)">Episodio 2</button>
+    <button class="prop-btn" id="pbtn3" onclick="showEp(3)">Episodio 3+</button>
+  </div>
+
+  <div class="prop-chain" id="propChain"></div>
+  <div class="prop-log" id="propLog">Presiona "Episodio 1" para comenzar la simulación.</div>
+</section>
+
+<!-- 6. HOYOS -->
+<div class="section-divider"></div>
+<section class="section reveal" id="hoyos">
+  <div class="section-tag">06 — Los Hoyos</div>
+  <h2>Por qué Q vale 0 al pisar un hoyo</h2>
+  <p>No hay ninguna lógica especial en el código. Ocurre de forma natural con la misma ecuación de Bellman. Cuando el agente cae en un hoyo, pasan tres cosas a la vez.</p>
+
+  <div class="hole-demo">
+    <div>
+      <div class="hole-chain">
+        <div class="hole-step" id="hs0">
+          <div class="hole-step-box" style="background:rgba(255,95,95,.12);color:var(--red)">r=0</div>
+          <div class="hole-step-info">
+            <h4>La recompensa es 0</h4>
+            <p>El hoyo no otorga ningún premio. El agente no llegó a la meta.</p>
+          </div>
+        </div>
+        <div class="hole-step" id="hs1">
+          <div class="hole-step-box" style="background:rgba(255,179,71,.12);color:var(--orange)">FIN</div>
+          <div class="hole-step-info">
+            <h4>El episodio termina</h4>
+            <p><code style="font-family:var(--font-m);font-size:11px;color:var(--text2)">terminated = True</code> — el agente no puede moverse desde un hoyo.</p>
+          </div>
+        </div>
+        <div class="hole-step" id="hs2">
+          <div class="hole-step-box" style="background:rgba(91,200,255,.12);color:var(--blue)">Q=0</div>
+          <div class="hole-step-info">
+            <h4>El futuro del hoyo es 0</h4>
+            <p>Como nunca se puede empezar desde un hoyo, su fila en la Q-Table nunca recibe un valor positivo.</p>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-ghost hole-btn" onclick="animHole()">▶ Ver el cálculo</button>
+    </div>
+
+    <div class="hole-calc">
+      <h4>Cálculo completo cuando el agente cae en H</h4>
+      <div class="calc-line"><span class="calc-key">r (recompensa)</span><span id="hc_r" style="color:var(--text3)">—</span></div>
+      <div class="calc-line"><span class="calc-key">max Q(hoyo)</span><span id="hc_f" style="color:var(--text3)">—</span></div>
+      <div class="calc-line"><span class="calc-key">objetivo = r + γ × max Q</span><span id="hc_obj" style="color:var(--text3)">—</span></div>
+      <div class="calc-line total"><span class="calc-key">error = objetivo − Q(s,a)</span><span id="hc_err" style="color:var(--text3)">—</span></div>
+      <div class="calc-line result"><span class="calc-key">nuevo Q(s,a)</span><span id="hc_new" style="color:var(--text3)">—</span></div>
+      <div id="hc_msg" style="margin-top:1rem;font-size:.84rem;color:var(--text3);line-height:1.6"></div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+<footer>
+  Aprendizaje Reforzado · Fundamentos de ML · EAFIT 2026 · hecho con Q-Learning y mucho γ
+</footer>
+
+<script>
+// ─── LAKE ───
+const MAP = ['S','F','F','F','F','H','F','H','F','F','F','H','H','F','F','G'];
+const lakeGrid = document.getElementById('lakeGrid');
+MAP.forEach((t, i) => {
+  const c = document.createElement('div');
+  c.className = `lake-cell ${t}`;
+  c.innerHTML = `${t}<span class="cell-id">${i}</span>`;
+  c.onclick = () => showCellInfo(i, t);
+  lakeGrid.appendChild(c);
+});
+function showCellInfo(id, type) {
+  const info = {
+    'S': `<strong style="color:var(--blue)">S — Inicio (Start)</strong><br>Estado número ${id}. El agente siempre empieza aquí al comienzo de cada episodio.`,
+    'F': `<strong style="color:var(--text)">F — Hielo seguro (Frozen)</strong><br>Estado número ${id}. Celda transitable. La Q-Table tiene 4 valores aquí, uno por cada acción posible.`,
+    'H': `<strong style="color:var(--red)">H — Hoyo (Hole)</strong><br>Estado número ${id}. Si el agente llega aquí: r=0, terminated=True. El episodio termina. Su Q siempre vale 0.`,
+    'G': `<strong style="color:var(--green)">G — Meta (Goal)</strong><br>Estado número ${id}. ¡Objetivo! r=1, terminated=True. El episodio termina con éxito. Es la única fuente de recompensa positiva.`
+  };
+  document.getElementById('lakeInfoContent').innerHTML = `<div style="font-size:.9rem;line-height:1.7;color:var(--text2)">${info[type]}</div>`;
+  document.querySelectorAll('.lake-cell').forEach(c => c.classList.remove('agent'));
+  lakeGrid.children[id].classList.add('agent');
+}
+
+// ─── Q-TABLE ───
+const QDATA_INIT = [
+  [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+  [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+  [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],
+  [0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]
+];
+const QDATA_TRAINED = [
+  [0.522,0.614,0.614,0.522],
+  [0.522,0.000,0.729,0.614],
+  [0.614,0.857,0.614,0.729],
+  [0.729,0.000,0.000,0.614],
+  [0.614,0.729,0.000,0.522],
+  [0.000,0.000,0.000,0.000],
+  [0.000,0.952,0.000,0.857],
+  [0.000,0.000,0.000,0.000],
+  [0.729,0.000,0.857,0.614],
+  [0.729,0.952,0.952,0.000],
+  [0.857,1.000,0.000,0.952],
+  [0.000,0.000,0.000,0.000],
+  [0.000,0.000,0.000,0.000],
+  [0.000,0.952,1.000,0.857],
+  [0.952,1.000,1.000,0.952],
+  [0.000,0.000,0.000,0.000]
+];
+const ACTIONS = ['← Izq','↓ Abajo','→ Der','↑ Arriba'];
+const tbody = document.getElementById('qtableBody');
+let qtMode = 'init';
+function renderQTable(data) {
+  tbody.innerHTML = '';
+  data.forEach((row, s) => {
+    const tr = document.createElement('tr');
+    const isHole = [5,7,11,12].includes(s);
+    const isGoal = s===15; const isStart = s===0;
+    let maxVal = Math.max(...row);
+    tr.innerHTML = `<td style="font-family:var(--font-m);font-size:11px;color:var(--text3)">${isHole?'⛔':isGoal?'🏆':isStart?'🟦':''}  s=${s}</td>`;
+    row.forEach((v, a) => {
+      const td = document.createElement('td');
+      const isMax = !isHole && !isGoal && v===maxVal && maxVal>0;
+      if(isHole) { td.style.background='rgba(255,95,95,.05)'; td.style.color='var(--text3)'; }
+      else if(isGoal) { td.style.color='var(--text3)'; }
+      else if(isMax) { td.style.background='rgba(61,219,160,.12)'; td.style.color='var(--green)'; td.style.fontWeight='600'; }
+      td.textContent = v.toFixed(3);
+      td.onclick = () => explainCell(s, a, v, isHole, isGoal, isMax);
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+renderQTable(QDATA_INIT);
+function explainCell(s, a, v, isHole, isGoal, isMax) {
+  const el = document.getElementById('qExplain');
+  if(isHole) { el.innerHTML = `<span style="color:var(--red)">⛔ Estado ${s} es un hoyo.</span> Todos sus valores Q son 0 y siempre lo serán — el episodio termina al llegar aquí, por lo que el agente nunca puede actuar desde este estado.`; return; }
+  if(isGoal) { el.innerHTML = `<span style="color:var(--green)">🏆 Estado ${s} es la meta.</span> Sus valores Q no importan porque el episodio termina al llegar aquí. La recompensa +1 ya fue entregada.`; return; }
+  const arrow = ACTIONS[a];
+  el.innerHTML = isMax
+    ? `<span style="color:var(--green)">✓ Mejor acción del estado ${s}</span>: hacer "${arrow}" desde aquí vale <strong>${v.toFixed(3)}</strong>. El agente ha aprendido que este movimiento lleva más cerca de la meta.`
+    : `Q(${s}, ${arrow}) = <strong>${v.toFixed(3)}</strong>. Hacer "${arrow}" desde el estado ${s} tiene un valor esperado de ${v.toFixed(3)} unidades de recompensa futura. ${v===0?'El agente aún no sabe que esto sirve, o aprendió que no conviene.':'Hay mejores opciones en este estado.'}`;
+}
+// toggle between init and trained
+let showTrained = false;
+function toggleQTable() {
+  showTrained = !showTrained;
+  renderQTable(showTrained ? QDATA_TRAINED : QDATA_INIT);
+  document.getElementById('qtBtn').textContent = showTrained ? 'Ver tabla inicial (ceros)' : 'Ver tabla entrenada';
+}
+
+// ─── BELLMAN SIM ───
+function simCalc() {
+  const q=+document.getElementById('s_q').value,a=+document.getElementById('s_a').value,
+        r=+document.getElementById('s_r').value,g=+document.getElementById('s_g').value,
+        f=+document.getElementById('s_f').value;
+  document.getElementById('v_q').textContent=q.toFixed(2);
+  document.getElementById('v_a').textContent=a.toFixed(2);
+  document.getElementById('v_r').textContent=r.toFixed(2);
+  document.getElementById('v_g').textContent=g.toFixed(2);
+  document.getElementById('v_f').textContent=f.toFixed(2);
+  const obj=r+g*f, err=obj-q, nq=q+a*err;
+  const dir=err>0.001?'↑ El valor Q subió — la acción fue mejor de lo que se creía':err<-0.001?'↓ El valor Q bajó — la acción fue peor de lo esperado':'= Sin cambio — la estimación era correcta';
+  const col=err>0.001?'var(--green)':err<-0.001?'var(--red)':'var(--text2)';
+  document.getElementById('simResult').innerHTML=
+    `<span class="mono" style="color:var(--text2)">objetivo = <span style="color:var(--orange)">${r.toFixed(2)}</span> + <span style="color:var(--red)">${g.toFixed(2)}</span> × <span style="color:var(--blue)">${f.toFixed(2)}</span> = <strong style="color:var(--text)">${obj.toFixed(4)}</strong></span><br>`+
+    `<span class="mono" style="color:var(--text2)">error = ${obj.toFixed(4)} − <span style="color:var(--accent2)">${q.toFixed(2)}</span> = <strong style="color:${col}">${err.toFixed(4)}</strong></span><br>`+
+    `<span class="mono" style="color:var(--text2)">nuevo Q = ${q.toFixed(2)} + <span style="color:var(--green)">${a.toFixed(2)}</span> × ${err.toFixed(4)} = <strong style="color:var(--text)">${nq.toFixed(4)}</strong></span>`+
+    `<span class="sim-big">${nq.toFixed(4)}<span class="sim-dir"> — ${dir}</span></span>`;
+}
+simCalc();
+
+// ─── PROPAGATION ───
+const epStates = [
+  { vals: [0,0,0,0], log: 'Al inicio, <strong>todo vale 0</strong>. El agente no sabe nada del entorno. Todos los Q(s,a) en la Q-Table son cero.' },
+  { vals: [0,0,0.8,0], log: '<strong>El agente pisa G por primera vez.</strong> Solo el estado 14 aprende algo:<br>r=1, max Q(15)=0 → objetivo = 1 + 0.95×0 = 1.0 → nuevo Q(14,→) = 0 + 0.8×1.0 = <strong style="color:var(--green)">0.80</strong><br>Gamma no tuvo efecto aquí porque el futuro valía 0.' },
+  { vals: [0,0.608,0.8,0], log: '<strong>El agente llega al estado 10 y baja al 14.</strong><br>r=0 (aún no llegó a la meta), max Q(14)=0.8 (¡aprendido antes!)<br>objetivo = 0 + 0.95 × 0.8 = <strong>0.76</strong> → nuevo Q(10,↓) = 0 + 0.8×0.76 = <strong style="color:var(--green)">0.608</strong><br>Aquí gamma "pasó" el valor del estado 14 hacia atrás, con descuento.' },
+  { vals: [0.464,0.608,0.8,0], log: '<strong>Con más episodios, el valor sigue propagándose hacia atrás.</strong><br>El estado S aprende que moverse hacia el 10 tiene valor:<br>objetivo ≈ 0 + 0.95 × 0.608 ≈ <strong>0.578</strong> → Q(S) ≈ <strong style="color:var(--green)">0.46</strong><br>Cada paso atrás vale un poco menos (× 0.95 por cada celda alejada de la meta).' }
+];
+const propCells = [
+  { id:0, name:'S', color:'rgba(91,200,255,.15)', bc:'rgba(91,200,255,.3)', tc:'var(--blue)', lbl:'Estado 0\nInicio' },
+  { id:1, name:'F', color:'var(--bg3)', bc:'var(--border)', tc:'var(--text2)', lbl:'Estado 10\n2 pasos' },
+  { id:2, name:'F', color:'var(--bg3)', bc:'var(--border)', tc:'var(--text2)', lbl:'Estado 14\n1 paso' },
+  { id:3, name:'G', color:'rgba(61,219,160,.15)', bc:'rgba(61,219,160,.3)', tc:'var(--green)', lbl:'Estado 15\nMeta' }
+];
+function renderPropChain(epIdx) {
+  const chain = document.getElementById('propChain');
+  chain.innerHTML = '';
+  epStates[epIdx].vals.forEach((v, i) => {
+    const c = propCells[i];
+    const div = document.createElement('div');
+    div.className = 'prop-cell';
+    const glow = v>0 ? `box-shadow:0 0 16px rgba(61,219,160,.3);border-color:rgba(61,219,160,.5);background:rgba(61,219,160,.12)` : `background:${c.color};border-color:${c.bc}`;
+    div.innerHTML = `<div class="prop-box" style="${glow}">
+      <span class="p-name" style="color:${v>0?'var(--green)':c.tc}">${c.name}</span>
+      <span class="p-q" style="color:${v>0?'var(--green)':'var(--text3)'}">${v>0?'Q≈'+v.toFixed(3):'Q=0'}</span>
+    </div>
+    <div class="prop-label">${c.lbl.replace('\n','<br>')}</div>`;
+    chain.appendChild(div);
+    if(i<3) {
+      const arr = document.createElement('div');
+      arr.className = 'prop-arrow';
+      arr.textContent = '→';
+      chain.appendChild(arr);
+    }
+  });
+  document.getElementById('propLog').innerHTML = epStates[epIdx].log;
+  document.querySelectorAll('.prop-btn').forEach((b,i) => b.classList.toggle('active', i===epIdx));
+}
+function showEp(i) { renderPropChain(i); }
+renderPropChain(0);
+
+// ─── HOLES ───
+let holeAnimated = false;
+function animHole() {
+  if(holeAnimated) {
+    ['hc_r','hc_f','hc_obj','hc_err','hc_new'].forEach(id => {
+      document.getElementById(id).textContent='—';
+      document.getElementById(id).style.color='var(--text3)';
+    });
+    document.getElementById('hc_msg').textContent='';
+    ['hs0','hs1','hs2'].forEach(id => document.getElementById(id).classList.remove('hl'));
+    holeAnimated=false; return;
+  }
+  holeAnimated=true;
+  const steps=[
+    {id:'hs0', key:'hc_r', val:'0', color:'var(--red)', delay:300},
+    {id:'hs1', key:'hc_f', val:'0', color:'var(--blue)', delay:800},
+    {id:'hs2', key:'hc_obj', val:'0 + 0.95 × 0 = 0', color:'var(--text)', delay:1300},
+  ];
+  steps.forEach(s => {
+    setTimeout(()=>{
+      document.getElementById(s.id).classList.add('hl');
+      document.getElementById(s.key).textContent=s.val;
+      document.getElementById(s.key).style.color=s.color;
+    }, s.delay);
+  });
+  setTimeout(()=>{
+    const prev = 0.4;
+    document.getElementById('hc_err').textContent=`0 − ${prev} = −${prev}`;
+    document.getElementById('hc_err').style.color='var(--red)';
+  }, 1800);
+  setTimeout(()=>{
+    const prev=0.4, a=0.8;
+    const nq = prev + a*(0-prev);
+    document.getElementById('hc_new').textContent=`${nq.toFixed(3)}`;
+    document.getElementById('hc_new').style.color='var(--orange)';
+    document.getElementById('hc_msg').innerHTML=`El error es <strong style="color:var(--red)">negativo</strong> — el agente esperaba algo de ese movimiento (0.4) pero no obtuvo nada (objetivo=0). Así el Q se reduce hacia 0. Con suficientes episodios, llega a 0 y el agente aprende a evitar ese camino.`;
+  }, 2300);
+}
+
+// Add toggle button to Q-table section
+window.addEventListener('DOMContentLoaded', () => {
+  const qtSection = document.getElementById('qtable');
+  const btnDiv = document.createElement('div');
+  btnDiv.style.marginTop='1rem';
+  btnDiv.innerHTML = `<button id="qtBtn" class="btn btn-ghost" onclick="toggleQTable()">Ver tabla entrenada</button>
+    <span style="font-size:.82rem;color:var(--text3);margin-left:1rem;font-family:var(--font-m)">compara la tabla vacía con los valores aprendidos</span>`;
+  qtSection.appendChild(btnDiv);
+});
+
+// ─── NAV ACTIVE ───
+const navLinks = document.querySelectorAll('.nav-link');
+const sections = document.querySelectorAll('section[id]');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href')==='#'+e.target.id));
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => io.observe(s));
+
+// ─── REVEAL ───
+const rev = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => rev.observe(el));
+</script>
+</body>
+</html>
